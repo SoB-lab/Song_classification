@@ -8,4 +8,5 @@ To obtain everything right it should be run as follow:
 2) conversion_to_pictures.py
 3) seperation_database.py: creates a seperated database for 10% test sample and 90% training data
 4) gen_datasets.py: Generate the datasets and run the model. The model is saved in 'my_model' for testing and analysis.
+5) test_model.py: Tests the model saved in 'my_model' with the test dataset.
 
