@@ -11,8 +11,15 @@ from tensorflow.keras.models import Sequential
 import matplotlib.pyplot as plt
 
 
+print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
+
 print(tf.__version__)
 print(keras.__version__)
+
+
+mirrored_strategy = tf.distribute.MirroredStrategy()
+print('Number of devices: {}'.format(mirrored_strategy.num_replicas_in_sync))
+
 
 def CNN_model(model, num_classes):
     model.add(layers.Conv2D(8, 3, padding='same', activation='relu'))
@@ -34,9 +41,13 @@ def CNN_model(model, num_classes):
 data_dir_train = 'picture_database_separated/train/'
 data_dir_test = 'picture_database_separated/test/'
 
-batch_size = 8
+batch_size = 2
 img_height = 400
 img_width = 1200
+
+
+options = tf.data.Options()
+options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.DATA
 
 train_ds = tf.keras.preprocessing.image_dataset_from_directory(
     data_dir_train,
@@ -56,22 +67,18 @@ val_ds = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=batch_size
 )
 
-test_ds = tf.keras.preprocessing.image_dataset_from_directory(
-    data_dir_test,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
+print(type(train_ds), type(val_ds))
 
-print(type(train_ds), type(val_ds), type(test_ds))
-
-class_names = train_ds.class_names
-print(class_names)
-num_classes = len(class_names)
+num_classes = 8
 
 for image_batch, labels_batch in train_ds:
     print(image_batch.shape)
     print(labels_batch.shape)
     break
+
+train_ds = train_ds.with_options(options)
+val_ds = val_ds.with_options(options)
+
 
 #AUTOTUNE = tf.data.experimental.AUTOTUNE
 #train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
@@ -88,9 +95,10 @@ print(np.min(first_image), np.max(first_image))
 
 # Beginning of the model
 
-model = Sequential()
+with mirrored_strategy.scope():
+    model = Sequential()
+    model = CNN_model(model, num_classes)
 
-model = CNN_model(model, num_classes)
 
 tf.keras.optimizers.Adam(
     learning_rate=0.001,name='Adam'
@@ -100,7 +108,7 @@ model.compile(optimizer='adam',
               loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
               metrics=['accuracy'])
 
-epochs = 15
+epochs = 5
 history = model.fit(
   train_ds,
   validation_data=val_ds,
