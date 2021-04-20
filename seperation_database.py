@@ -4,7 +4,7 @@ import pandas as pd
 import shutil, os
 
 
-mypath = 'picture_database/'
+mypath = 'picture_bigger_windows/'
 new_path = 'picture_database_seperated/'
 ListFolders = [g for g in listdir(mypath) if isdir(join(mypath, g))]
 for folder in ListFolders:
