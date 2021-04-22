@@ -1,3 +1,7 @@
+'''Created with python 3.8 or above, with tensorflow 2.4
+Run CNN model for music genre classification for 3 different classes of 3000 samples each
+Fine-tuned for the following model of two convolutionnal layers, two Maxpooling and two densification before linearization
+'''
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -10,6 +14,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
 
 
 batch_size = 16
+
 
 def CNN_model2(model, num_classes):
     model.add(layers.Conv2D(32, kernel_size=(3,3), strides=(2,2), padding='same', activation='relu'))
@@ -75,15 +80,17 @@ for image_batch, labels_batch in train_ds:
     print(labels_batch.shape)
     break
 
-#AUTOTUNE = tf.data.experimental.AUTOTUNE
-#train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-#val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+AUTOTUNE = tf.data.experimental.AUTOTUNE
+train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
 
 print("---------------------------------------------------------------------")
 print("creation of the model")
 print("---------------------------------------------------------------------")
 
 
+
+#Removal of the data augmentation because of the image artefact that are created and modify the genre of the songs
 data_augmentation = tf.keras.Sequential([
     layers.experimental.preprocessing.Rescaling(1. / 255),
     #layers.experimental.preprocessing.RandomZoom(height_factor=(0.2, 0.3)),
@@ -106,6 +113,7 @@ model.compile(optimizer=opti,
 
 
 
+# Following line only use during tuning to early stop the fitting in case of over/underfitting
 #earlystop_callback = EarlyStopping(monitor = 'val_accuracy',
                                    #min_delta = 0.001,
                                    #patience=8)
@@ -124,9 +132,17 @@ history = model.fit(
 
 model.summary()
 
+
+#Save the model for potential reuse or testing
 model.save('my_model')
 
+#Print the summary of each trainable and non trainable parameters of each layers
 model.summary()
+
+print("---------------------------------------------------------------------")
+print("Return metrics")
+print("---------------------------------------------------------------------")
+
 
 acc = history.history['accuracy']
 val_acc = history.history['val_accuracy']
@@ -135,6 +151,7 @@ loss = history.history['loss']
 val_loss = history.history['val_loss']
 
 import pandas
+#Save the metrics from history
 pandas.DataFrame(history.history).to_csv("history.csv")
 
 
