@@ -17,4 +17,4 @@ Program should be run as follow:
 Additional files: conversion_to_pictures.py For entire generation of the entire picture corresponding to the mel spectrogram (no sampling)
 
 
-This repository was partly inspired by Julien Despois: https://medium.com/@juliendespois/finding-the-genre-of-a-song-with-deep-learning-da8f59a61194
+This repository was partly inspired by Julien Despois' article on Medium: https://medium.com/@juliendespois/finding-the-genre-of-a-song-with-deep-learning-da8f59a61194
