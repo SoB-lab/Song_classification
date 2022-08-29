@@ -3,29 +3,29 @@ import tensorflow as tf
 
 from tensorflow import keras
 from tensorflow.keras.models import load_model
-from keras.preprocessing import image
-import joblib
+from tensorflow.keras.preprocessing import image
 
 
-batch_size = 32
-img_height = 400
-img_width = 1200
+batch_size = 16
+img_height = 480
+img_width = 620
 
-data_dir_test = 'picture_database_separated/test/'
+data_dir_test = 'picture_database_seperated/test/'
 
 test_ds = tf.keras.preprocessing.image_dataset_from_directory(
   data_dir_test,
   image_size=(img_height, img_width),
+  color_mode='rgb',
   batch_size=batch_size)
 
-model = load_model('my_model')
+model = load_model('my_model_2')
 
 predictions = np.array([])
 Y_pred = np.array([])
 labels =  np.array([])
 Y_true = np.array([])
 for x, y in test_ds:
-    predictions = model.predict(x,batch_size=32)
+    predictions = model.predict(x,batch_size=16)
     y_pred = np.argmax(predictions, axis=1)
     Y_pred = np.append(y_pred, Y_pred)
     Y_true = np.append(y, Y_true)
